@@ -13,7 +13,7 @@ export default function Home() {
     "ubiquity-dkim-2",
     "ubiquity-dkim-3",
   ]
-  const domain = router.query.domain;
+  const domain = String(router.query.domain);
 
   if (!domain) return null;
 
