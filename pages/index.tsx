@@ -40,7 +40,7 @@ export default function Home() {
         {selectors.map((selector) => <tr>
           <td>CNAME</td>
           <td>{selector}._domainkey.{domain}</td>
-          <td>{selector}-{domain.replaceAll(".", "-")}.amazonses.ubiquity-prod.co.nz</td>
+          <td>{selector}-{domain.replaceAll(".", "-")}.ses.ubiquity-prod.co.nz</td>
         </tr>)}
         </tbody>
         </table>
