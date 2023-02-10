@@ -25,6 +25,8 @@ export default function Home() {
   const onClick = async () => {
     setQueryOutput([<div style={{ marginBottom: "1rem" }}>Querying records for {domains.length} domains...</div>]);
 
+    let numCorrectlyConfigured = 0;
+
     for (const domain of domains) {
       const dkimDomains = [
         `ubiquity-dkim-1._domainkey.${domain}`,
@@ -42,11 +44,12 @@ export default function Home() {
       });
 
       const isCorrectlyConfigured = (await Promise.all(promises)).every(Boolean);
+      numCorrectlyConfigured += isCorrectlyConfigured ? 1 : 0
       setQueryOutput(prev => prev.concat(`${isCorrectlyConfigured ? "\u2705" : "\u274c"} ${domain}`));
       bottomRef.current?.scrollIntoView({ behavior: "auto" })
     }
 
-    setQueryOutput(prev => prev.concat(<div style={{ marginTop: "1rem" }}>Query complete.</div>));
+    setQueryOutput(prev => prev.concat(<div style={{ marginTop: "1rem" }}>Query complete. {numCorrectlyConfigured} of {domains.length} domains are correctly configured.</div>));
 
     window.localStorage.setItem("domains", JSON.stringify(domains))
   };
