@@ -32,7 +32,9 @@ export default function Home() {
         headers: { accept: "application/dns-json" },
       });
       const result = await response.json()
-      const domainCnameCorrectlyConfigured = result.Answer?.[0].data === "custom.engage.ubiquity.co.nz";
+      const domainCnameCorrectlyConfigured = result.Answer?.[0].data === "custom.engage.ubiquity.co.nz.";
+
+      setQueryOutput(prev => prev.concat(result.Answer?.[0].data));
 
       const dkimDomains = [
         `ubiquity-dkim-1._domainkey.${domain}`,
