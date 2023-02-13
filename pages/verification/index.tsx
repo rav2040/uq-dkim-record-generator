@@ -31,8 +31,9 @@ export default function Home() {
       const response = await fetch(`https://cloudflare-dns.com/dns-query?name=${domain.trim()}&type=CNAME`, {
         headers: { accept: "application/dns-json" },
       });
-      const result = await response.json()
-      const domainCnameCorrectlyConfigured = result.Answer?.[0].data === "custom.engage.ubiquity.co.nz.";
+      const result = await response.json();
+      const ubiquityCnameCorrectlyConfigured = result.Answer?.[0].data === "custom.engage.ubiquity.co.nz.";
+      const caCnameCorrectlyConfigured = result.Answer?.[0].data === "custom.ubiquity.co.nz.";
 
       const dkimDomains = [
         `ubiquity-dkim-1._domainkey.${domain}`,
@@ -49,9 +50,16 @@ export default function Home() {
         return result.Answer?.[0].data === expectedRecord;
       });
 
-      const isCorrectlyConfigured = domainCnameCorrectlyConfigured && (await Promise.all(promises)).every(Boolean);
-      numCorrectlyConfigured += isCorrectlyConfigured ? 1 : 0
-      setQueryOutput(prev => prev.concat(`${isCorrectlyConfigured ? "\u2705" : "\u274c"} ${domain}`));
+      const isDkimCorrectlyConfigured = (await Promise.all(promises)).every(Boolean);
+
+      numCorrectlyConfigured += (
+        isDkimCorrectlyConfigured && (ubiquityCnameCorrectlyConfigured || caCnameCorrectlyConfigured)
+      ) ? 1 : 0
+
+      const dkimStatus = isDkimCorrectlyConfigured ? "\u2705" : "\u274c";
+      const cnameStatus = ubiquityCnameCorrectlyConfigured ? "\u2705" : caCnameCorrectlyConfigured ? "☑️" : "\u274c";
+
+      setQueryOutput(prev => prev.concat(`${dkimStatus}${cnameStatus} ${domain}`));
       bottomRef.current?.scrollIntoView({ behavior: "auto" })
     }
 
