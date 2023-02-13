@@ -28,6 +28,12 @@ export default function Home() {
     let numCorrectlyConfigured = 0;
 
     for (const domain of domains) {
+      const response = await fetch(`https://cloudflare-dns.com/dns-query?name=${domain.trim()}&type=CNAME`, {
+        headers: { accept: "application/dns-json" },
+      });
+      const result = await response.json()
+      const domainCnameCorrectlyConfigured = result.Answer?.[0].data === "custom.engage.ubiquity.co.nz";
+
       const dkimDomains = [
         `ubiquity-dkim-1._domainkey.${domain}`,
         `ubiquity-dkim-2._domainkey.${domain}`,
@@ -43,7 +49,7 @@ export default function Home() {
         return result.Answer?.[0].data === expectedRecord;
       });
 
-      const isCorrectlyConfigured = (await Promise.all(promises)).every(Boolean);
+      const isCorrectlyConfigured = domainCnameCorrectlyConfigured && (await Promise.all(promises)).every(Boolean);
       numCorrectlyConfigured += isCorrectlyConfigured ? 1 : 0
       setQueryOutput(prev => prev.concat(`${isCorrectlyConfigured ? "\u2705" : "\u274c"} ${domain}`));
       bottomRef.current?.scrollIntoView({ behavior: "auto" })
@@ -81,7 +87,7 @@ export default function Home() {
             </div>
           </div>
           <div>
-            {queryOutput.length > 0 && <div className={firaMono.className} style={{ padding: "1rem", width: "800px", borderRadius: "4px", backgroundColor: "#333", color: "#eee", fontSize: "1.25rem" }}>
+            {queryOutput.length > 0 && <div className={firaMono.className} style={{ padding: "1rem", minWidth: "800px", borderRadius: "4px", backgroundColor: "#333", color: "#eee", fontSize: "1.25rem" }}>
               {queryOutput.map((line, i) => <div key={i}>{line}</div>)}
             </div>}
             <div ref={bottomRef} />
