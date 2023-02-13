@@ -34,8 +34,6 @@ export default function Home() {
       const result = await response.json()
       const domainCnameCorrectlyConfigured = result.Answer?.[0].data === "custom.engage.ubiquity.co.nz.";
 
-      setQueryOutput(prev => prev.concat(result.Answer?.[0].data));
-
       const dkimDomains = [
         `ubiquity-dkim-1._domainkey.${domain}`,
         `ubiquity-dkim-2._domainkey.${domain}`,
