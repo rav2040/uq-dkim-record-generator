@@ -15,7 +15,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
         const peerCertificate = socket.getPeerCertificate();
 
         if (!peerCertificate.subject.CN.endsWith(servername)) {
-            res.status(200).end();
+            res.status(200).end("");
         }
 
         res.status(200).end(peerCertificate.valid_to);
@@ -23,10 +23,10 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
     });
 
     setTimeout(() => {
-        res.status(200).end();
+        res.status(200).end("");
         socket.destroy();
     }, 3000);
 
-    socket.on('error', () => res.status(500).end());
+    socket.on('error', () => res.status(500).end(""));
     socket.on('close', () => console.log("Connection has closed."));
 }
