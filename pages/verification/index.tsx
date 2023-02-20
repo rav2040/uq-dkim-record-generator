@@ -27,7 +27,7 @@ export default function Home() {
 
     let numCorrectlyConfigured = 0;
 
-    for (const domain of domains) {
+    await Promise.allSettled(domains.map(async (domain) => {
       const response = await fetch(`https://cloudflare-dns.com/dns-query?name=${domain.trim()}&type=CNAME`, {
         headers: { accept: "application/dns-json" },
       });
@@ -70,7 +70,7 @@ export default function Home() {
 
       setQueryOutput(prev => prev.concat(<>{dkimStatus}{cnameStatus} <span style={{ color: exp && exp.getTime() > new Date().getTime() ? "#4BB543" : "#FF9494" }}>{exp?.toLocaleDateString("en-NZ") ?? "NULL"}</span> {domain}</>));
       bottomRef.current?.scrollIntoView({ behavior: "auto" })
-    }
+    }));
 
     setQueryOutput(prev => prev.concat(<div style={{ marginTop: "1rem" }}>Query complete. {numCorrectlyConfigured} of {domains.length} domains are correctly configured.</div>));
 
