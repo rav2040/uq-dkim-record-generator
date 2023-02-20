@@ -44,7 +44,8 @@ export default function Home() {
       const getSSLExpiry = async () => {
         const response = await fetch(`api/ssl?servername=${domain.trim()}`);
         const str = await response.text();
-        return str.length ? new Date(str) : null;
+        const d = str.length ? new Date(str) : null
+        return d.toString() === "Invalid Date" ? null : d;
       };
 
       const exp = await getSSLExpiry();
