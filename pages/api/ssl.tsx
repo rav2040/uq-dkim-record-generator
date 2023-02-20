@@ -13,6 +13,11 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
 
     const socket = connect(connectOptions, () => {
         const peerCertificate = socket.getPeerCertificate();
+
+        if (!peerCertificate.subject.CN.endsWith(servername)) {
+            res.status(200).end();
+        }
+
         res.status(200).end(peerCertificate.valid_to);
         socket.destroy();
     });
