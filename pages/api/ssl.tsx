@@ -27,6 +27,6 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
         socket.destroy();
     }, 3000);
 
-    socket.on('error', () => res.status(500).end(""));
+    socket.on('error', () => res.status(200).end(""));
     socket.on('close', () => console.log("Connection has closed."));
 }
