@@ -41,6 +41,14 @@ export default function Home() {
         `ubiquity-dkim-3._domainkey.${domain}`,
       ];
 
+      const getSSLExpiry = async () => {
+        const response = await fetch(`api/ssl?servername=${domain.trim()}`);
+        const str = await response.text();
+        return str.length ? new Date(str) : null;
+      };
+
+      const exp = await getSSLExpiry();
+
       const promises = dkimDomains.map(async (dkimDomain, i) => {
         const expectedRecord = `ubiquity-dkim-${i + 1}-${domain.replaceAll(".", "-")}.ses.ubiquity-prod.co.nz.`;
         const response = await fetch(`https://cloudflare-dns.com/dns-query?name=${dkimDomain.trim()}&type=CNAME`, {
@@ -59,7 +67,7 @@ export default function Home() {
       const dkimStatus = isDkimCorrectlyConfigured ? "\u2705" : "\u274c";
       const cnameStatus = ubiquityCnameCorrectlyConfigured ? "\u2705" : caCnameCorrectlyConfigured ? "☑️" : "\u274c";
 
-      setQueryOutput(prev => prev.concat(`${dkimStatus}${cnameStatus} ${domain}`));
+      setQueryOutput(prev => prev.concat(<>{dkimStatus}{cnameStatus} <span style={{ color: exp && exp.getTime() > new Date().getTime() ? "#4BB543" : "#FF9494" }}>{exp?.toLocaleDateString("en-NZ") ?? "NULL"}</span> {domain}</>));
       bottomRef.current?.scrollIntoView({ behavior: "auto" })
     }
 
