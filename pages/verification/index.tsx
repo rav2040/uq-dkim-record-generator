@@ -8,6 +8,20 @@ import Button from '@mui/material/Button';
 const inter = Inter({ subsets: ['latin'] })
 const firaMono = Fira_Mono({ subsets: ['latin'], weight: "500" })
 
+const exepctedCnameValues = [
+  "custom.engage.ubiquity.co.nz.",
+  "custom.ubiquity.co.nz."
+]
+
+const hasConflictingRecords = async (domain: string) => {
+  return Promise.all(["TXT", "MX"].map(async (type) => {
+    const response = await fetch(`https://cloudflare-dns.com/dns-query?name=${domain}&type=${type}`, {
+      headers: { accept: "application/dns-json" },
+    });
+    const result = await response.json();
+    return !exepctedCnameValues.includes(result.Answer?.[0].data);
+  }));
+}
 
 export default function Home() {
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -34,6 +48,8 @@ export default function Home() {
       const result = await response.json();
       const ubiquityCnameCorrectlyConfigured = result.Answer?.[0].data === "custom.engage.ubiquity.co.nz.";
       const caCnameCorrectlyConfigured = result.Answer?.[0].data === "custom.ubiquity.co.nz.";
+
+      const isCnameConflicting = (await hasConflictingRecords(domain.trim())).some(Boolean);
 
       const dkimDomains = [
         `ubiquity-dkim-1._domainkey.${domain}`,
@@ -66,7 +82,7 @@ export default function Home() {
       ) ? 1 : 0
 
       const dkimStatus = isDkimCorrectlyConfigured ? "\u2705" : "\u274c";
-      const cnameStatus = ubiquityCnameCorrectlyConfigured ? "\u2705" : caCnameCorrectlyConfigured ? "☑️" : "\u274c";
+      const cnameStatus = isCnameConflicting ? "\u274c" : (ubiquityCnameCorrectlyConfigured ? "\u2705" : caCnameCorrectlyConfigured ? "☑️" : "\u274c");
 
       setQueryOutput(prev => prev.concat(<>{dkimStatus}{cnameStatus} <span style={{ color: exp && exp.getTime() > new Date().getTime() ? "#4BB543" : "#FF9494" }}>{exp?.toLocaleDateString("en-NZ") ?? "NULL"}</span> {domain}</>));
       bottomRef.current?.scrollIntoView({ behavior: "auto" })
