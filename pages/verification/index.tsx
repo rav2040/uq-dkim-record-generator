@@ -52,9 +52,9 @@ export default function Home() {
       const isCnameConflicting = (await hasConflictingRecords(domain.trim())).some(Boolean);
 
       const dkimDomains = [
-        `ubiquity-dkim-1._domainkey.${domain}`,
-        `ubiquity-dkim-2._domainkey.${domain}`,
-        `ubiquity-dkim-3._domainkey.${domain}`,
+        `ubiquity-dkim-1._domainkey.${domain.trim()}`,
+        `ubiquity-dkim-2._domainkey.${domain.trim()}`,
+        `ubiquity-dkim-3._domainkey.${domain.trim()}`,
       ];
 
       const getSSLExpiry = async () => {
@@ -67,7 +67,7 @@ export default function Home() {
       const exp = await getSSLExpiry();
 
       const promises = dkimDomains.map(async (dkimDomain, i) => {
-        const expectedRecord = `ubiquity-dkim-${i + 1}-${domain.replaceAll(".", "-")}.ses.ubiquity-prod.co.nz.`;
+        const expectedRecord = `ubiquity-dkim-${i + 1}-${domain.trim().replaceAll(".", "-")}.ses.ubiquity-prod.co.nz.`;
         const response = await fetch(`https://cloudflare-dns.com/dns-query?name=${dkimDomain.trim()}&type=CNAME`, {
           headers: { accept: "application/dns-json" },
         });
@@ -84,7 +84,7 @@ export default function Home() {
       const dkimStatus = isDkimCorrectlyConfigured ? "\u2705" : "\u274c";
       const cnameStatus = isCnameConflicting ? "\u274c" : (ubiquityCnameCorrectlyConfigured ? "\u2705" : caCnameCorrectlyConfigured ? "☑️" : "\u274c");
 
-      setQueryOutput(prev => prev.concat(<>{dkimStatus}{cnameStatus} <span style={{ color: exp && exp.getTime() > new Date().getTime() ? "#4BB543" : "#FF9494" }}>{exp?.toLocaleDateString("en-NZ") ?? "NULL"}</span> {domain}</>));
+      setQueryOutput(prev => prev.concat(<>{dkimStatus}{cnameStatus} <span style={{ color: exp && exp.getTime() > new Date().getTime() ? "#4BB543" : "#FF9494" }}>{exp?.toLocaleDateString("en-NZ") ?? "NULL"}</span> {domain.trim()}</>));
       bottomRef.current?.scrollIntoView({ behavior: "auto" })
     }));
 
