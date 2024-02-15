@@ -39,7 +39,7 @@ export default function Home() {
   const onClick = async () => {
     setQueryOutput([<div style={{ marginBottom: "1rem" }}>Querying records for {domains.length} domains...</div>]);
 
-    let numCorrectlyConfigured = 0;
+    let dkimNumCorrectlyConfigured = 0;
 
     setQueryOutput(prev => prev.concat([<div>DKIM | DMARC | MailFrom | HH | &nbsp;&nbsp;&nbsp;SSL</div>]));
 
@@ -81,7 +81,7 @@ export default function Home() {
 
       const isDkimCorrectlyConfigured = (await Promise.all(promises)).every(Boolean);
 
-      numCorrectlyConfigured += isDkimCorrectlyConfigured ? 1 : 0;
+      dkimNumCorrectlyConfigured += isDkimCorrectlyConfigured ? 1 : 0;
 
       const dmarcResponse = await fetch(`https://cloudflare-dns.com/dns-query?name=_dmarc.${domain.trim()}&type=TXT`, {
         headers: { accept: "application/dns-json" },
@@ -105,7 +105,7 @@ export default function Home() {
       bottomRef.current?.scrollIntoView({ behavior: "auto" })
     }));
 
-    setQueryOutput(prev => prev.concat(<div style={{ marginTop: "1rem" }}>Query complete. {numCorrectlyConfigured} of {domains.length} domains are correctly configured.</div>));
+    setQueryOutput(prev => prev.concat(<div style={{ marginTop: "1rem" }}>Query complete. {dkimNumCorrectlyConfigured} of {domains.length} domains are correctly configured for email sending.</div>));
 
     window.localStorage.setItem("domains", JSON.stringify(domains))
   };
