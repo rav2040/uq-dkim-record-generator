@@ -41,6 +41,8 @@ export default function Home() {
 
     let numCorrectlyConfigured = 0;
 
+    setQueryOutput(prev => prev.concat([<div>DKIM | DMARC | MailFrom | HH | &nbsp;&nbsp;&nbsp;SSL</div>]));
+
     await Promise.allSettled(domains.map(async (domain) => {
       const response = await fetch(`https://cloudflare-dns.com/dns-query?name=${domain.trim()}&type=CNAME`, {
         headers: { accept: "application/dns-json" },
@@ -66,6 +68,8 @@ export default function Home() {
 
       const exp = await getSSLExpiry();
 
+      const isSSLCorrectlyConfigured = exp && exp.getTime() > new Date().getTime();
+
       const promises = dkimDomains.map(async (dkimDomain, i) => {
         const expectedRecord = `ubiquity-dkim-${i + 1}-${domain.trim().replaceAll(".", "-")}.ses.ubiquity-prod.co.nz.`;
         const response = await fetch(`https://cloudflare-dns.com/dns-query?name=${dkimDomain.trim()}&type=CNAME`, {
@@ -77,14 +81,27 @@ export default function Home() {
 
       const isDkimCorrectlyConfigured = (await Promise.all(promises)).every(Boolean);
 
-      numCorrectlyConfigured += (
-        isDkimCorrectlyConfigured && (ubiquityCnameCorrectlyConfigured || caCnameCorrectlyConfigured)
-      ) ? 1 : 0
+      numCorrectlyConfigured += isDkimCorrectlyConfigured ? 1 : 0;
+
+      const dmarcResponse = await fetch(`https://cloudflare-dns.com/dns-query?name=_dmarc.${domain.trim()}&type=TXT`, {
+        headers: { accept: "application/dns-json" },
+      });
+      const dmarcResult = await dmarcResponse.json();
+      const dmarcConfigured = Boolean(dmarcResult.Answer?.[0].data);
+
+      const mailfromResponse = await fetch(`https://cloudflare-dns.com/dns-query?name=smtp.${domain.trim()}&type=CNAME`, {
+        headers: { accept: "application/dns-json" },
+      });
+      const mailfromResult = await mailfromResponse.json();
+      const mailfromCorrectlyConfigured = mailfromResult.Answer?.[0].data === "feedback-smtp.ses.ubiquity-prod.co.nz.";
 
       const dkimStatus = isDkimCorrectlyConfigured ? "\u2705" : "\u274c";
+      const dmarcStatus = dmarcConfigured ? "\u2705" : "\u274c";
+      const mailFromStatus = mailfromCorrectlyConfigured ? "\u2705" : "\u274c";
+
       const cnameStatus = isCnameConflicting ? "\u274c" : (ubiquityCnameCorrectlyConfigured ? "\u2705" : caCnameCorrectlyConfigured ? "☑️" : "\u274c");
 
-      setQueryOutput(prev => prev.concat(<>{dkimStatus}{cnameStatus} <span style={{ color: exp && exp.getTime() > new Date().getTime() ? "#4BB543" : "#FF9494" }}>{exp?.toLocaleDateString("en-NZ") ?? "NULL"}</span> {domain.trim()}</>));
+      setQueryOutput(prev => prev.concat(<><span style={{ padding: "0 18px 0 14px"}}>{dkimStatus}</span>|<span style={{ padding: "0 28px 0 29px"}}>{dmarcStatus}</span>|<span style={{ padding: "0 46px 0 46px"}}>{mailFromStatus}</span>|<span style={{ padding: "0 10px 0 11px"}}>{cnameStatus}</span>|&nbsp;<span style={{ color: isSSLCorrectlyConfigured ? "#4BB543" : "#FF9494" }}>{exp?.toLocaleDateString("en-NZ") ?? "NULL"}</span> {domain.trim()}</>));
       bottomRef.current?.scrollIntoView({ behavior: "auto" })
     }));
 
