@@ -53,7 +53,7 @@ export default function Home() {
           <td>v=DMARC1; p=reject; pct=100; fo=1; ri=3600;</td>
         </tr>
         <tr>
-          <td>TXT</td>
+          <td>CNAME</td>
           <td>smtp.{domain}</td>
           <td>feedback-smtp.ses.ubiquity-prod.co.nz</td>
         </tr>
