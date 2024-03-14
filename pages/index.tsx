@@ -42,6 +42,21 @@ export default function Home() {
           <td>{selector}._domainkey.{domain}</td>
           <td>{selector}-{domain.replaceAll(".", "-")}.ses.ubiquity-prod.co.nz</td>
         </tr>)}
+        <tr>
+          <td>CNAME</td>
+          <td>{domain}</td>
+          <td>custom.engage.ubiquity.co.nz</td>
+        </tr>
+        <tr>
+          <td>TXT</td>
+          <td>_dmarc.{domain}</td>
+          <td>v=DMARC1; p=reject; pct=100; fo=1; ri=3600;</td>
+        </tr>
+        <tr>
+          <td>TXT</td>
+          <td>smtp.{domain}</td>
+          <td>feedback-smtp.ses.ubiquity-prod.co.nz</td>
+        </tr>
         </tbody>
         </table>
       </main>
