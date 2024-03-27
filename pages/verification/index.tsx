@@ -83,6 +83,22 @@ export default function Home() {
 
       dkimNumCorrectlyConfigured += isDkimCorrectlyConfigured ? 1 : 0;
 
+      const dmarcHostnames = domain.trim().split(".").map((_, i, arr) => arr.slice(i).join("."));
+
+      const dmarcResponsePromises = dmarcHostnames.map(async (hostname) => {
+        try {
+          const dmarcResponse = await fetch(`https://cloudflare-dns.com/dns-query?name=_dmarc.${hostname}&type=TXT`, {
+            headers: { accept: "application/dns-json" },
+          });
+          const dmarcResult = await dmarcResponse.json();
+          return Boolean(dmarcResult.Answer?.[0].data);
+        } catch {
+          return false;
+        }
+      );
+
+      const dmarcConfigured = (await Promise.all(dmarcResponsePromises)).includes(true);
+
       const dmarcResponse = await fetch(`https://cloudflare-dns.com/dns-query?name=_dmarc.${domain.trim()}&type=TXT`, {
         headers: { accept: "application/dns-json" },
       });
