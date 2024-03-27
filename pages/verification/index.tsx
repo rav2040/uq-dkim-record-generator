@@ -99,12 +99,6 @@ export default function Home() {
 
       const dmarcConfigured = (await Promise.all(dmarcResponsePromises)).includes(true);
 
-      const dmarcResponse = await fetch(`https://cloudflare-dns.com/dns-query?name=_dmarc.${domain.trim()}&type=TXT`, {
-        headers: { accept: "application/dns-json" },
-      });
-      const dmarcResult = await dmarcResponse.json();
-      const dmarcConfigured = Boolean(dmarcResult.Answer?.[0].data);
-
       const mailfromResponse = await fetch(`https://cloudflare-dns.com/dns-query?name=smtp.${domain.trim()}&type=CNAME`, {
         headers: { accept: "application/dns-json" },
       });
