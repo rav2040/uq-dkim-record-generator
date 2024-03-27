@@ -95,7 +95,7 @@ export default function Home() {
         } catch {
           return false;
         }
-      );
+      });
 
       const dmarcConfigured = (await Promise.all(dmarcResponsePromises)).includes(true);
 
